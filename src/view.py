@@ -1,5 +1,33 @@
 import tkinter as tk
 
+class Form :
+    
+    def __init__(self, name, fields, controller):
+        self.name = name
+        self.fields = fields
+        self.controller = controller
+    
+    def view(self, root):
+        entries = dict()
+        
+        root.title(f"{self.name} Form Page")
+        root.geometry("900x600")
+        root.resizable(False, False)
+        
+        position = 10
+        for field in self.fields:
+            label = tk.Label(root, text=f"{field} :")
+            label.pack(pady=(position, 5))
+            
+            entry = tk.Entry(root)
+            entry.pack()
+            
+            entries[field] = entry
+            position += 10
+
+        btn = tk.Button(root, text="Validate", command=lambda : self.controller(entries))
+        btn.pack(pady=20)
+
 class SEPView :
     
     def __init__(self, controller) :
@@ -29,3 +57,6 @@ class SEPView :
 
         btn_login = tk.Button(self.root, text="Connect", command=lambda : self.controller.logInController(entries))
         btn_login.pack(pady=20)
+        
+    def formView(self, form):
+        form.view(self.root)
