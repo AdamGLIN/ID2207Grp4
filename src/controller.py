@@ -11,5 +11,7 @@ class SEPController:
 
         if (username, password) in self.model.getCredentials():
             messagebox.showinfo("Ok", f"Welcome, {username} !")
+            return True
         else:
             messagebox.showerror("Error", "Wrong credentials")
+            return False

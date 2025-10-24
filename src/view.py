@@ -6,9 +6,10 @@ class Form :
         self.name = name
         self.fields = fields
         self.controller = controller
+        self.entries = dict()
     
     def view(self, root):
-        entries = dict()
+        self.entries = dict()
         
         root.title(f"{self.name} Form Page")
         root.geometry("900x600")
@@ -22,10 +23,10 @@ class Form :
             entry = tk.Entry(root)
             entry.pack()
             
-            entries[field] = entry
+            self.entries[field] = entry
             position += 10
 
-        btn = tk.Button(root, text="Validate", command=lambda : self.controller(entries))
+        btn = tk.Button(root, text="Validate", command=lambda : self.controller(self.entries))
         btn.pack(pady=20)
 
 class SEPView :
@@ -33,11 +34,14 @@ class SEPView :
     def __init__(self, controller) :
         self.root = tk.Tk()
         self.controller = controller
+        self.entries = dict()
+        
+    def show(self):
         self.logInView()
         self.root.mainloop()
 
     def logInView(self):
-        entries = dict()
+        self.entries = dict()
         
         self.root.title("Log In Page")
         self.root.geometry("300x200")
@@ -47,15 +51,15 @@ class SEPView :
         label_username.pack(pady=(20, 5))
         entry_username = tk.Entry(self.root)
         entry_username.pack()
-        entries["username"] = entry_username
+        self.entries["username"] = entry_username
 
         label_password = tk.Label(self.root, text="Password :")
         label_password.pack(pady=(10, 5))
         entry_password = tk.Entry(self.root, show="*")
         entry_password.pack()
-        entries["password"] = entry_password
+        self.entries["password"] = entry_password
 
-        btn_login = tk.Button(self.root, text="Connect", command=lambda : self.controller.logInController(entries))
+        btn_login = tk.Button(self.root, text="Connect", command=lambda : self.controller.logInController(self.entries))
         btn_login.pack(pady=20)
         
     def formView(self, form):
