@@ -10,6 +10,7 @@ view = SEPView()
 controller = SEPController()
 
 view.setController(controller)
+view.setModel(model)
 controller.setModel(model)
 controller.setView(view)
 

@@ -20,6 +20,8 @@ class SEPController:
             match access:
                 case "Customer Service Officer":
                     self.view.customerServiceOfficerView()
+                case "Senior Customer Service Officer":
+                    self.view.seniorCustomerServiceOfficerView()
                 case _:
                     messagebox.showinfo("Ok", f"Welcome, {username} !")
             return True
@@ -31,4 +33,5 @@ class SEPController:
         request = dict()
         for entry in entries :
             request[entry] = entries[entry].get()
+        request["Status"] = "Initial"
         self.model.saveRequest(request)

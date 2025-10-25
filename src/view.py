@@ -1,4 +1,6 @@
 import tkinter as tk
+import json
+
 from src.model import Access
 
 class Form :
@@ -11,11 +13,6 @@ class Form :
         self.size = size
     
     def view(self, root):
-        self.entries.clear()
-        
-        for widget in root.winfo_children():
-            widget.destroy()
-
         root.title(f"{self.name} Form Page")
         root.geometry(self.size)
         root.resizable(False, False)
@@ -51,6 +48,9 @@ class SEPView :
     def __init__(self) :
         self.root = tk.Tk()
         self.entries = dict()
+    
+    def setModel(self, model):
+        self.model = model
         
     def setController(self, controller):
         self.controller = controller
@@ -58,12 +58,14 @@ class SEPView :
     def show(self):
         self.logInView()
         self.root.mainloop()
+        
+    def clearView(self):
+        for widget in self.root.winfo_children():
+            widget.destroy()
 
     def logInView(self):
         self.entries.clear()
-        
-        for widget in self.root.winfo_children():
-            widget.destroy()
+        self.clearView()
         
         self.root.title("Log In Page")
         self.root.geometry("400x300")
@@ -92,5 +94,39 @@ class SEPView :
         btn_login.pack(pady=20)
         
     def customerServiceOfficerView(self):
+        self.entries.clear()
+        self.clearView()
+        
         form = ClientCallForm(self.entries, self.controller.clientCallController)
         form.view(self.root)
+        
+    def seniorCustomerServiceOfficerView(self):
+        self.entries.clear()
+        self.clearView()
+        
+        requests = self.model.getRequests()
+        
+        self.root.title("Senior Customer Service Officer Review Page")
+        self.root.geometry("900x600")
+        self.root.resizable(False, False)
+        
+        for request in requests:
+            match request["Status"]:
+                case "Initial":
+                    label = tk.Label(self.root, text=json.dumps(request, indent=4), justify="left")
+                    label.pack(pady=(30, 5))
+                    
+                    label = tk.Label(self.root, text=f"Commentary :")
+                    label.pack(pady=(20, 5))
+                    entry = tk.Entry(self.root)
+                    entry.pack()
+                    self.entries["Senior Customer Service Officer Commentary"] = entry
+                    
+                    btn_validate = tk.Button(self.root, text="Validate", command=lambda : print("Validate"))
+                    btn_validate.pack(pady=20)
+                    
+                    btn_reject = tk.Button(self.root, text="Reject", command=lambda : print("Reject"))
+                    btn_reject.pack(pady=10)
+                    break
+                case _:
+                    continue    

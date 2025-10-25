@@ -48,7 +48,8 @@ def correctRequestSaveFromEmpty(_model, view, controller):
         "Type" : "2",
         "Date" : "3",
         "Budget" : "4",
-        "Description" : "5"
+        "Description" : "5",
+        "Status" : "Initial"
     }
     
     view.entries["Client Name"].insert(0, "0")
@@ -79,7 +80,8 @@ def correctRequestSaveFromNotEmpty(_model, view, controller):
         "Type" : "2",
         "Date" : "3",
         "Budget" : "4",
-        "Description" : "5"
+        "Description" : "5",
+        "Status" : "Initial"
     }
     
     view.entries["Client Name"].insert(0, "0")
