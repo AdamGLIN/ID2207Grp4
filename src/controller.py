@@ -8,8 +8,9 @@ class SEPController:
     def logInController(self, entries):
         username = entries["username"].get()
         password = entries["password"].get()
+        access = entries["access"].get()
 
-        if (username, password) in self.model.getCredentials():
+        if (username, password, access) in self.model.getCredentials():
             messagebox.showinfo("Ok", f"Welcome, {username} !")
             return True
         else:

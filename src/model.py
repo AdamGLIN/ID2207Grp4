@@ -1,5 +1,11 @@
 import json
 
+Access = [
+    "Customer Service Officer",
+    "Senior Customer Service Officer",
+    "Admin"
+]
+
 class SEPModel :
     
     def __init__(self):

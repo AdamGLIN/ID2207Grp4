@@ -1,4 +1,5 @@
 import tkinter as tk
+from src.model import Access
 
 class Form :
     
@@ -44,20 +45,27 @@ class SEPView :
         self.entries = dict()
         
         self.root.title("Log In Page")
-        self.root.geometry("300x200")
+        self.root.geometry("400x300")
         self.root.resizable(False, False)
         
         label_username = tk.Label(self.root, text="Username :")
-        label_username.pack(pady=(20, 5))
+        label_username.pack(pady=(30, 5))
         entry_username = tk.Entry(self.root)
         entry_username.pack()
         self.entries["username"] = entry_username
 
         label_password = tk.Label(self.root, text="Password :")
-        label_password.pack(pady=(10, 5))
+        label_password.pack(pady=(20, 5))
         entry_password = tk.Entry(self.root, show="*")
         entry_password.pack()
         self.entries["password"] = entry_password
+        
+        label_access = tk.Label(self.root, text="Access :")
+        label_access.pack(pady=(10, 5))
+        entry_access = tk.StringVar(value="...")
+        option_menu = tk.OptionMenu(self.root, entry_access, *Access)
+        option_menu.pack()
+        self.entries["access"] = entry_access
 
         btn_login = tk.Button(self.root, text="Connect", command=lambda : self.controller.logInController(self.entries))
         btn_login.pack(pady=20)
