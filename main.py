@@ -6,8 +6,12 @@ from src.model import SEPModel
 from tests.tester import SEPTester
 
 model = SEPModel()
-controller = SEPController(model)
-view = SEPView(controller)
+view = SEPView()
+controller = SEPController()
+
+view.setController(controller)
+controller.setModel(model)
+controller.setView(view)
 
 if "-test" in sys.argv:
     tester = SEPTester(model, view, controller)

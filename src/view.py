@@ -3,17 +3,21 @@ from src.model import Access
 
 class Form :
     
-    def __init__(self, name, fields, controller):
+    def __init__(self, entries, name, fields, callback, size):
+        self.entries = entries
         self.name = name
         self.fields = fields
-        self.controller = controller
-        self.entries = dict()
+        self.callback = callback
+        self.size = size
     
     def view(self, root):
-        self.entries = dict()
+        self.entries.clear()
         
+        for widget in root.winfo_children():
+            widget.destroy()
+
         root.title(f"{self.name} Form Page")
-        root.geometry("900x600")
+        root.geometry(self.size)
         root.resizable(False, False)
         
         position = 10
@@ -27,22 +31,39 @@ class Form :
             self.entries[field] = entry
             position += 10
 
-        btn = tk.Button(root, text="Validate", command=lambda : self.controller(self.entries))
+        btn = tk.Button(root, text="Validate", command=lambda : self.callback(self.entries))
         btn.pack(pady=20)
+        
+class ClientCallForm(Form) :
+    
+    def __init__(self, entries, callback):
+        super().__init__(entries, "Client Call", [
+            "Client Name", 
+            "Contact", 
+            "Type", 
+            "Date", 
+            "Budget", 
+            "Description"
+        ], callback, "900x600")
 
 class SEPView :
     
-    def __init__(self, controller) :
+    def __init__(self) :
         self.root = tk.Tk()
-        self.controller = controller
         self.entries = dict()
+        
+    def setController(self, controller):
+        self.controller = controller
         
     def show(self):
         self.logInView()
         self.root.mainloop()
 
     def logInView(self):
-        self.entries = dict()
+        self.entries.clear()
+        
+        for widget in self.root.winfo_children():
+            widget.destroy()
         
         self.root.title("Log In Page")
         self.root.geometry("400x300")
@@ -52,23 +73,24 @@ class SEPView :
         label_username.pack(pady=(30, 5))
         entry_username = tk.Entry(self.root)
         entry_username.pack()
-        self.entries["username"] = entry_username
+        self.entries["Username"] = entry_username
 
         label_password = tk.Label(self.root, text="Password :")
         label_password.pack(pady=(20, 5))
         entry_password = tk.Entry(self.root, show="*")
         entry_password.pack()
-        self.entries["password"] = entry_password
+        self.entries["Password"] = entry_password
         
         label_access = tk.Label(self.root, text="Access :")
         label_access.pack(pady=(10, 5))
         entry_access = tk.StringVar(value="...")
         option_menu = tk.OptionMenu(self.root, entry_access, *Access)
         option_menu.pack()
-        self.entries["access"] = entry_access
+        self.entries["Access"] = entry_access
 
         btn_login = tk.Button(self.root, text="Connect", command=lambda : self.controller.logInController(self.entries))
         btn_login.pack(pady=20)
         
-    def formView(self, form):
+    def customerServiceOfficerView(self):
+        form = ClientCallForm(self.entries, self.controller.clientCallController)
         form.view(self.root)
