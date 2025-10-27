@@ -44,7 +44,7 @@ class ClientCallForm(Form) :
             "Description"
         ], callback, "900x600")
 
-class ControlPanel() :
+class ReviewPage() :
     
     def __init__(self, entries, name, size, callbacks):
         self.entries = entries
@@ -53,7 +53,7 @@ class ControlPanel() :
         self.callbacks = callbacks
 
     def view(self, root, requests):
-        root.title(f"{self.name} Control Panel")
+        root.title(f"{self.name} Review Page")
         root.geometry(self.size)
         root.resizable(False, False)
         
@@ -77,7 +77,7 @@ class ControlPanel() :
                     btn_reject.pack(pady=10)
                     break
 
-class SeniorCustomerServiceOfficerControlPanel(ControlPanel):
+class SeniorCustomerServiceOfficerReviewPage(ReviewPage):
     
     def __init__(self, entries, callbacks):
         super().__init__(entries, "Senior Customer Service Officer", "900x600", callbacks)
@@ -148,6 +148,55 @@ class SEPView :
             "Initial": self.controller.seniorCustomerServiceOfficerReview
         }
         
-        controlPanel = SeniorCustomerServiceOfficerControlPanel(self.entries, callbacks)
+        controlPanel = SeniorCustomerServiceOfficerReviewPage(self.entries, callbacks)
         controlPanel.view(self.root, requests)
     
+    def productionManagerView(self):
+        self.entries.clear()
+        self.clearView()
+        
+        requests = self.model.getRequests()
+        
+        self.root.title(f"Production Manager Page")
+        self.root.geometry("900x900")
+        self.root.resizable(False, False)
+        
+        for request in requests:
+            if request["Status"] == "Accepted" and "Production Tasks Distributed" not in request:
+                label = tk.Label(self.root, text=json.dumps(request, indent=4), justify="left")
+                label.pack(pady=(60, 5))
+                self.entries["Request"] = request
+                
+                label_photo = tk.Label(self.root, text="Photography Task Description :")
+                label_photo.pack(pady=(50, 5))
+                entry_photo = tk.Entry(self.root)
+                entry_photo.pack()
+                self.entries["Photography Task Description"] = entry_photo
+                
+                label_audio = tk.Label(self.root, text="Audio Task Description :")
+                label_audio.pack(pady=(40, 5))
+                entry_audio = tk.Entry(self.root)
+                entry_audio.pack()
+                self.entries["Audio Task Description"] = entry_audio
+                
+                label_graphics = tk.Label(self.root, text="Graphics Task Description :")
+                label_graphics.pack(pady=(30, 5))
+                entry_graphic = tk.Entry(self.root)
+                entry_graphic.pack()
+                self.entries["Graphics Task Description"] = entry_graphic
+                
+                label_decorating = tk.Label(self.root, text="Decorating Task Description :")
+                label_decorating.pack(pady=(20, 5))
+                entry_decorating = tk.Entry(self.root)
+                entry_decorating.pack()
+                self.entries["Decorating Task Description"] = entry_decorating
+                
+                label_network = tk.Label(self.root, text="Network Task Description :")
+                label_network.pack(pady=(10, 5))
+                entry_network = tk.Entry(self.root)
+                entry_network.pack()
+                self.entries["Network Task Description"] = entry_network
+                
+                btn_validate = tk.Button(self.root, text="Validate", command=lambda : self.controller.productionManagerController(self.entries))
+                btn_validate.pack(pady=20)
+                break

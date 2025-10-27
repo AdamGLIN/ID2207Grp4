@@ -22,6 +22,8 @@ class SEPController:
                     self.view.customerServiceOfficerView()
                 case "Senior Customer Service Officer":
                     self.view.seniorCustomerServiceOfficerView()
+                case "Production Manager":
+                    self.view.productionManagerView()
                 case _:
                     messagebox.showinfo("Ok", f"Welcome, {username} !")
             return True
@@ -46,3 +48,12 @@ class SEPController:
             request["Status"] = "Rejected"
         self.model.saveRequest(request)
         self.view.seniorCustomerServiceOfficerView()
+
+    def productionManagerController(self, entries):
+        request = entries["Request"]
+        for key in entries.keys():
+            if key != "Request":
+                request[key] = entries[key].get()
+        request["Production Tasks Distributed"] = True
+        self.model.saveRequest(request)
+        self.view.productionManagerView()

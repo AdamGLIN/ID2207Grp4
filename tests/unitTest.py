@@ -160,6 +160,44 @@ def invalidInitialClientRequestAnalysis(model, view, controller):
             return request in json.load(f)
     except (FileNotFoundError):
         return False
+    
+def productionManagerTaskDistribution(model, view, controller):
+    if os.path.exists("db/request.json"):
+        os.remove("db/request.json")
+        
+    request = {
+        "Client Name" : "0",
+        "Contact" : "1",
+        "Type" : "2",
+        "Date" : "3",
+        "Budget" : "4",
+        "Description" : "5",
+        "Status" : "Accepted",
+        "Photography Task Description": "6",
+        "Audio Task Description" : "7",
+        "Graphics Task Description" : "8",
+        "Decorating Task Description" : "9",
+        "Network Task Description" : "10"
+    }
+    
+    model.saveRequest(request)
+        
+    view.productionManagerView()
+    
+    view.entries["Photography Task Description"].insert(0, "6")
+    view.entries["Audio Task Description"].insert(0, "7")
+    view.entries["Graphics Task Description"].insert(0, "8")
+    view.entries["Decorating Task Description"].insert(0, "9")
+    view.entries["Network Task Description"].insert(0, "10")
+    
+    controller.productionManagerController(view.entries)
+    
+    try :
+        with open("db/request.json", "r") as f:
+            request["Production Tasks Distributed"] = True
+            return request in json.load(f)
+    except (FileNotFoundError):
+        return False
 
 testSet = [
     obj for _, obj in inspect.getmembers(sys.modules[__name__], inspect.isfunction)
