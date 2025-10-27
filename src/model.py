@@ -4,7 +4,8 @@ Access = [
     "Customer Service Officer",
     "Senior Customer Service Officer",
     "Production Manager",
-    "Service Manager"
+    "Service Manager",
+    "Financial Manager",
     "Admin"
 ]
 
