@@ -200,3 +200,31 @@ class SEPView :
                 btn_validate = tk.Button(self.root, text="Validate", command=lambda : self.controller.productionManagerController(self.entries))
                 btn_validate.pack(pady=20)
                 break
+
+    def financialManagerView(self):
+        self.entries.clear()
+        self.clearView()
+
+        requests = self.model.getRequests() or []
+        finance_reqs = [r for r in requests if r.get("Status") == "Financial Review"]
+
+        if not finance_reqs:
+            self.root.title("Financial Manager Review Page")
+            self.root.geometry("900x600")
+            self.root.resizable(False, False)
+            tk.Label(self.root, text="No requests awaiting Financial Review.", font=("TkDefaultFont", 12)).pack(pady=30)
+            tk.Button(self.root, text="Back", command=self.logInView).pack(pady=10)
+            return
+
+        callbacks = {
+            "Financial Review": self.controller.financialManagerController
+        }
+        panel = FinancialManagerReviewPage(self.entries, callbacks)
+        panel.view(self.root, finance_reqs)
+
+
+
+
+class FinancialManagerReviewPage(ReviewPage):
+    def __init__(self, entries, callbacks):
+        super().__init__(entries, "Financial Manager", "900x600", callbacks)
