@@ -115,6 +115,7 @@ class SEPView :
                 case "Initial":
                     label = tk.Label(self.root, text=json.dumps(request, indent=4), justify="left")
                     label.pack(pady=(30, 5))
+                    self.entries["Request"] = request
                     
                     label = tk.Label(self.root, text=f"Commentary :")
                     label.pack(pady=(20, 5))
@@ -122,10 +123,10 @@ class SEPView :
                     entry.pack()
                     self.entries["Senior Customer Service Officer Commentary"] = entry
                     
-                    btn_validate = tk.Button(self.root, text="Validate", command=lambda : print("Validate"))
+                    btn_validate = tk.Button(self.root, text="Validate", command=lambda : self.controller.seniorCustomerServiceOfficerReview(self.entries, True))
                     btn_validate.pack(pady=20)
                     
-                    btn_reject = tk.Button(self.root, text="Reject", command=lambda : print("Reject"))
+                    btn_reject = tk.Button(self.root, text="Reject", command=lambda : self.controller.seniorCustomerServiceOfficerReview(self.entries, False))
                     btn_reject.pack(pady=10)
                     break
                 case _:

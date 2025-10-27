@@ -35,3 +35,14 @@ class SEPController:
             request[entry] = entries[entry].get()
         request["Status"] = "Initial"
         self.model.saveRequest(request)
+        
+    def seniorCustomerServiceOfficerReview(self, entries, valid):
+        request = entries["Request"]
+        commentary = entries["Senior Customer Service Officer Commentary"].get()
+        request["Senior Customer Service Officer Commentary"] = commentary
+        if valid :
+            request["Status"] = "Financial Review"
+        else :
+            request["Status"] = "Rejected"
+        self.model.saveRequest(request)
+        self.view.seniorCustomerServiceOfficerView()

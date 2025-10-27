@@ -39,9 +39,7 @@ def wrongAccess(_model, view, controller):
 def correctRequestSaveFromEmpty(_model, view, controller):
     if os.path.exists("db/request.json"):
         os.remove("db/request.json")
-    
-    view.customerServiceOfficerView()
-    
+        
     request = {
         "Client Name" : "0",
         "Contact" : "1",
@@ -49,8 +47,11 @@ def correctRequestSaveFromEmpty(_model, view, controller):
         "Date" : "3",
         "Budget" : "4",
         "Description" : "5",
-        "Status" : "Initial"
+        "Status" : "Initial",
+        "Id": 0
     }
+    
+    view.customerServiceOfficerView()
     
     view.entries["Client Name"].insert(0, "0")
     view.entries["Contact"].insert(0, "1")
@@ -67,13 +68,11 @@ def correctRequestSaveFromEmpty(_model, view, controller):
     except (FileNotFoundError):
         return False
     
-def correctRequestSaveFromNotEmpty(_model, view, controller):
+def correctRequestSaveFromNotEmpty(model, view, controller):
     data = []
     with open("db/request.json", "w") as f:
-            json.dump(data, f, indent=4)
-            
-    view.customerServiceOfficerView()
-    
+        json.dump(data, f, indent=4)
+        
     request = {
         "Client Name" : "0",
         "Contact" : "1",
@@ -81,8 +80,11 @@ def correctRequestSaveFromNotEmpty(_model, view, controller):
         "Date" : "3",
         "Budget" : "4",
         "Description" : "5",
-        "Status" : "Initial"
+        "Status" : "Initial",
+        "Id": model.getNewId(data)
     }
+            
+    view.customerServiceOfficerView()
     
     view.entries["Client Name"].insert(0, "0")
     view.entries["Contact"].insert(0, "1")
@@ -95,6 +97,66 @@ def correctRequestSaveFromNotEmpty(_model, view, controller):
     
     try :
         with open("db/request.json", "r") as f:
+            return request in json.load(f)
+    except (FileNotFoundError):
+        return False
+    
+def validInitialClientRequestAnalysis(model, view, controller):
+    if os.path.exists("db/request.json"):
+        os.remove("db/request.json")
+        
+    request = {
+        "Client Name" : "0",
+        "Contact" : "1",
+        "Type" : "2",
+        "Date" : "3",
+        "Budget" : "4",
+        "Description" : "5",
+        "Status" : "Initial"
+    }
+    
+    model.saveRequest(request)
+        
+    view.seniorCustomerServiceOfficerView()
+    
+    view.entries["Senior Customer Service Officer Commentary"].insert(0, "6")
+    
+    controller.seniorCustomerServiceOfficerReview(view.entries, True)
+    
+    try :
+        with open("db/request.json", "r") as f:
+            request["Status"] = "Financial Review"
+            request["Senior Customer Service Officer Commentary"] = "6"
+            return request in json.load(f)
+    except (FileNotFoundError):
+        return False
+    
+def invalidInitialClientRequestAnalysis(model, view, controller):
+    if os.path.exists("db/request.json"):
+        os.remove("db/request.json")
+        
+    request = {
+        "Client Name" : "0",
+        "Contact" : "1",
+        "Type" : "2",
+        "Date" : "3",
+        "Budget" : "4",
+        "Description" : "5",
+        "Status" : "Initial"
+    }
+    
+    model.saveRequest(request)
+        
+    view.seniorCustomerServiceOfficerView()
+    
+    view.entries["Senior Customer Service Officer Commentary"].insert(0, "6")
+    
+    controller.seniorCustomerServiceOfficerReview(view.entries, False)
+    
+    try :
+        with open("db/request.json", "r") as f:
+            request["Status"] = "Rejected"
+            request["Senior Customer Service Officer Commentary"] = "6"
             return request in json.load(f)
     except (FileNotFoundError):
         return False
