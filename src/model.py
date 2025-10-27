@@ -6,6 +6,13 @@ Access = [
     "Admin"
 ]
 
+Status = [
+    "Initial",
+    "Financial Review",
+    "Accepted",
+    "Rejected"
+]
+
 class SEPModel :
     
     def __init__(self):
