@@ -84,6 +84,10 @@ class SeniorCustomerServiceOfficerReviewPage(ReviewPage):
 class FinancialManagerReviewPage(ReviewPage):
     def __init__(self, entries, callbacks):
         super().__init__(entries, "Financial Manager", "900x600", callbacks)
+        
+class AdministrationManagerReviewPage(ReviewPage):
+    def __init__(self, entries, callbacks):
+        super().__init__(entries, "Administration Manager", "900x600", callbacks)
 
 class HiringApplicationForm(Form):
     def __init__(self, entries, callback):
@@ -94,7 +98,6 @@ class HiringApplicationForm(Form):
             callback,
             "750x500"
         )
-
 
 class SEPView :
     
@@ -307,3 +310,15 @@ class SEPView :
                   command=lambda: self.controller.hrUpdateStatus(self.entries, "Hiring Process Started")).pack(side="left", padx=6)
 
         tk.Button(self.root, text="Back", command=self.logInView).pack(pady=16)
+        
+    def administrationManagerView(self):
+        self.entries.clear()
+        self.clearView()
+        
+        requests = self.model.getRequests()
+        callbacks = {
+            "Administration Review": self.controller.administrationManagerController
+        }
+        
+        controlPanel = AdministrationManagerReviewPage(self.entries, callbacks)
+        controlPanel.view(self.root, requests)

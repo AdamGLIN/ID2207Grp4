@@ -30,6 +30,8 @@ class SEPController:
                     self.view.serviceManagerView()
                 case "HR Manager":
                     self.view.hrHiringView()
+                case "Admin":
+                    self.view.administrationManagerView()
                 case _:
                     messagebox.showinfo("Ok", f"Welcome, {username} !")
             return True
@@ -85,7 +87,7 @@ class SEPController:
         request["Financial Manager Commentary"] = commentary
 
         if valid:
-            request["Status"] = "Accepted"
+            request["Status"] = "Administration Review"
             try:
                 self.model.updateSepFinanceOnAcceptance(request.get("Budget"))
             except Exception as e:
@@ -143,4 +145,13 @@ class SEPController:
         except AttributeError:
             pass
 
-
+    def administrationManagerController(self, entries, valid):
+        request = entries["Request"]
+        commentary = entries["Administration Manager Commentary"].get()
+        request["Senior Customer Service Officer Commentary"] = commentary
+        if valid :
+            request["Status"] = "Accepted"
+        else :
+            request["Status"] = "Rejected"
+        self.model.saveRequest(request)
+        self.view.administrationManagerView()
