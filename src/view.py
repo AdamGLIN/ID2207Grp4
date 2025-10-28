@@ -205,6 +205,9 @@ class SEPView :
         self.entries.clear()
         self.clearView()
 
+        btn = tk.Button(self.root, text="Show Monthly Budgets", command=self.showFinanceBudgets)
+        btn.pack(pady=(10, 5))
+
         requests = self.model.getRequests() or []
         finance_reqs = [r for r in requests if r.get("Status") == "Financial Review"]
 
@@ -221,6 +224,31 @@ class SEPView :
         }
         panel = FinancialManagerReviewPage(self.entries, callbacks)
         panel.view(self.root, finance_reqs)
+
+    def showFinanceBudgets(self):
+        win = tk.Toplevel(self.root)
+        win.title("SEP Budgets")
+        win.geometry("650x300")
+        win.resizable(False, False)
+
+        months = self.controller.financeGetMonths() or []
+        if not months:
+            tk.Label(win, text="No finance data.", font=("TkDefaultFont", 11)).pack(pady=20)
+            return
+
+        wrap = tk.Frame(win)
+        wrap.pack(fill="both", expand=True, padx=10, pady=10)
+
+        for m in months:
+            snap = self.controller.financeGetMonthlySnapshot(m)
+            tk.Label(
+                wrap,
+                text=f"{snap['month']}:  Budget {int(snap['budget'])}  |  Spent {int(snap['spent'])}  |  Left {int(snap['left'])}  ({snap['left_pct']}%)",
+                anchor="w", justify="left"
+            ).pack(anchor="w", pady=2)
+
+        tk.Button(wrap, text="Close", command=win.destroy).pack(pady=8)
+
 
 
 

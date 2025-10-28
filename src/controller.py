@@ -33,6 +33,12 @@ class SEPController:
             messagebox.showerror("Error", "Wrong credentials")
             return False
         
+    def financeGetMonths(self):
+        return self.model.getSepFinanceMonths()
+
+    def financeGetMonthlySnapshot(self, month_str: str):
+        return self.model.getSepMonthlySnapshot(month_str)
+        
     def clientCallController(self, entries):
         request = dict()
         for entry in entries :
@@ -61,10 +67,12 @@ class SEPController:
         self.view.productionManagerView()
 
     def financialManagerController(self, entries, valid):
-        request = entries["Request"]
+        if "Request" not in entries:
+            messagebox.showerror("Error", "No request selected.")
+            return
 
-        comment_widget = entries.get("Financial Manager Commentary")
-        commentary = comment_widget.get().strip() if comment_widget else ""
+        request = entries["Request"]
+        commentary = entries.get("Financial Manager Commentary").get().strip() if entries.get("Financial Manager Commentary") else ""
 
         if not commentary:
             messagebox.showwarning("Missing commentary", "Please add a commentary before proceeding.")
@@ -72,11 +80,17 @@ class SEPController:
 
         request["Financial Manager Commentary"] = commentary
 
-        # Decision (validate or reject)
         if valid:
-            request["Status"] = "Administration Review"
+            request["Status"] = "Accepted"
+            try:
+                self.model.updateSepFinanceOnAcceptance(request.get("Budget"))
+            except Exception as e:
+                messagebox.showwarning("Finance update", f"Saved request, but failed to update SEP finance: {e}")
         else:
             request["Status"] = "Rejected"
-            self.model.saveRequest(request)
 
-        self.view.financialManagerView()
+        self.model.saveRequest(request)
+        try:
+            self.view.financialManagerView()
+        except AttributeError:
+            messagebox.showinfo("Saved", "Decision recorded.")

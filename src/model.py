@@ -1,4 +1,5 @@
 import json
+import os
 
 Access = [
     "Customer Service Officer",
@@ -55,5 +56,66 @@ class SEPModel :
         
         with open("db/request.json", "w") as f:
             json.dump(data, f, indent=4)
-            
+
+
+    _SEP_FINANCE_PATH = "db/sep_finance.json"
+
+    def _ensure_sep_finance_seed(self):
+        if not os.path.exists(self._SEP_FINANCE_PATH):
+            os.makedirs("db", exist_ok=True)
+            seed = {
+                "Past event season": {"budget": 200000, "spent": 180000},
+                "Current event season": {"budget": 200000, "spent": 0},
+                "Upcoming event season": {"budget": 200000, "spent": 0}
+            }
+            with open(self._SEP_FINANCE_PATH, "w", encoding="utf-8") as f:
+                json.dump(seed, f, indent=2)
+
+    def _load_sep_finance(self):
+        self._ensure_sep_finance_seed()
+        with open(self._SEP_FINANCE_PATH, "r", encoding="utf-8") as f:
+            return json.load(f)
+
+    def getSepFinanceMonths(self):
+        """List of available YYYY-MM strings."""
+        data = self._load_sep_finance()
+        return sorted(data.keys())
+
+    def getSepMonthlySnapshot(self, month_str: str):
+        """
+        Return: {'month','budget','spent','left','left_pct'}
+        """
+        data = self._load_sep_finance()
+        row = data.get(month_str)
+        if not row:
+            return {"month": month_str, "budget": 0, "spent": 0, "left": 0, "left_pct": 0.0}
+        budget = float(row.get("budget", 0))
+        spent = float(row.get("spent", 0))
+        left = budget - spent
+        left_pct = (left / budget * 100.0) if budget > 0 else 0.0
+        return {
+            "month": month_str,
+            "budget": budget,
+            "spent": spent,
+            "left": left,
+            "left_pct": round(left_pct, 2)
+        }
     
+    def updateSepFinanceOnAcceptance(self, amount, season="Current event season"):
+        self._ensure_sep_finance_seed()
+        try:
+            amt = float(amount) if amount is not None else 0.0
+        except (TypeError, ValueError):
+            amt = 0.0
+
+        with open(self._SEP_FINANCE_PATH, "r", encoding="utf-8") as f:
+            data = json.load(f)
+
+        row = data.get(season, {"budget": 0, "spent": 0})
+        row["spent"] = float(row.get("spent", 0)) + max(0.0, amt)
+
+        data[season] = row
+
+        os.makedirs("db", exist_ok=True)
+        with open(self._SEP_FINANCE_PATH, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2)
