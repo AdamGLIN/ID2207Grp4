@@ -26,6 +26,10 @@ class SEPController:
                     self.view.productionManagerView()
                 case "Financial Manager":
                     self.view.financialManagerView()
+                case "Service Manager":
+                    self.view.serviceManagerView()
+                case "HR Manager":
+                    self.view.hrHiringView()
                 case _:
                     messagebox.showinfo("Ok", f"Welcome, {username} !")
             return True
@@ -94,3 +98,49 @@ class SEPController:
             self.view.financialManagerView()
         except AttributeError:
             messagebox.showinfo("Saved", "Decision recorded.")
+
+    def serviceManagerHiringController(self, entries):
+        """Create a minimal hiring application from the form fields."""
+        name = entries["Name"].get().strip()
+        contact = entries["Contact"].get().strip()
+        salary = entries["Salary"].get().strip()
+        position = entries["Position"].get().strip()
+        start_date = entries["Start Date"].get().strip()
+
+        if not name or not salary or not position or not start_date:
+            messagebox.showwarning("Missing fields", "Please fill Name, Salary, Position and Start Date.")
+            return
+
+        application = {
+            "Name": name,
+            "Contact": contact,
+            "Salary": salary,
+            "Position": position,
+            "Start Date": start_date,
+            "Status": "Hiring Requested"
+        }
+
+        self.model.saveHiringApplication(application)
+        messagebox.showinfo("Saved", "Hiring application created.")
+        # stay on page for rapid entry
+        try:
+            self.view.serviceManagerView()
+        except AttributeError:
+            pass
+
+    def hrUpdateStatus(self, entries, new_status: str):
+        """HR sets status for the selected hiring application, then refreshes the HR page."""
+        if "Application" not in entries:
+            messagebox.showerror("Error", "No hiring application selected.")
+            return
+
+        app = entries["Application"]
+        app["Status"] = new_status
+        self.model.saveHiringApplication(app)
+        messagebox.showinfo("Saved", f"Application status set to: {new_status}")
+        try:
+            self.view.hrHiringView()
+        except AttributeError:
+            pass
+
+

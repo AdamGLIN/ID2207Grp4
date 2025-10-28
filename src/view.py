@@ -78,9 +78,23 @@ class ReviewPage() :
                     break
 
 class SeniorCustomerServiceOfficerReviewPage(ReviewPage):
-    
     def __init__(self, entries, callbacks):
         super().__init__(entries, "Senior Customer Service Officer", "900x600", callbacks)
+
+class FinancialManagerReviewPage(ReviewPage):
+    def __init__(self, entries, callbacks):
+        super().__init__(entries, "Financial Manager", "900x600", callbacks)
+
+class HiringApplicationForm(Form):
+    def __init__(self, entries, callback):
+        super().__init__(
+            entries,
+            "Hiring Application",
+            ["Name", "Contact", "Salary", "Position", "Start Date"],
+            callback,
+            "750x500"
+        )
+
 
 class SEPView :
     
@@ -249,10 +263,47 @@ class SEPView :
 
         tk.Button(wrap, text="Close", command=win.destroy).pack(pady=8)
 
+    def serviceManagerView(self):
+        self.entries.clear()
+        self.clearView()
 
+        self.root.title("Service Manager – Hiring Application")
+        self.root.geometry("500x360")
+        self.root.resizable(False, False)
 
+        form = HiringApplicationForm(self.entries, self.controller.serviceManagerHiringController)
+        form.view(self.root)
 
+    def hrHiringView(self):
+        self.entries.clear()
+        self.clearView()
 
-class FinancialManagerReviewPage(ReviewPage):
-    def __init__(self, entries, callbacks):
-        super().__init__(entries, "Financial Manager", "900x600", callbacks)
+        self.root.title("HR – Hiring Requests")
+        self.root.geometry("700x500")
+        self.root.resizable(False, False)
+
+        applications = self.model.getHiringApplications() or []
+        pending = [a for a in applications if a.get("Status") == "Hiring Requested"]
+
+        if not pending:
+            tk.Label(self.root, text="No hiring requests awaiting HR.", font=("TkDefaultFont", 12)).pack(pady=30)
+            tk.Button(self.root, text="Back", command=self.logInView).pack(pady=10)
+            return
+
+        app = pending[0]
+        self.entries["Application"] = app
+
+        tk.Label(self.root, text="Hiring application:", font=("TkDefaultFont", 11, "bold")).pack(pady=(16, 6))
+        tk.Label(self.root, text=json.dumps(app, indent=4), justify="left", anchor="w").pack(padx=10, pady=(0, 16))
+
+        # Action buttons
+        btns = tk.Frame(self.root)
+        btns.pack(pady=10)
+
+        tk.Button(btns, text="Decline",
+                  command=lambda: self.controller.hrUpdateStatus(self.entries, "Declined")).pack(side="left", padx=6)
+
+        tk.Button(btns, text="Start Hiring Process",
+                  command=lambda: self.controller.hrUpdateStatus(self.entries, "Hiring Process Started")).pack(side="left", padx=6)
+
+        tk.Button(self.root, text="Back", command=self.logInView).pack(pady=16)

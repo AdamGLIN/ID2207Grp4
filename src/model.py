@@ -7,6 +7,7 @@ Access = [
     "Production Manager",
     "Service Manager",
     "Financial Manager",
+    "HR Manager",
     "Admin"
 ]
 
@@ -119,3 +120,34 @@ class SEPModel :
         os.makedirs("db", exist_ok=True)
         with open(self._SEP_FINANCE_PATH, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2)
+
+    _HIRING_PATH = "db/hiring.json"
+
+    def getHiringApplications(self):
+        """Return list of hiring applications (minimal)."""
+        try:
+            with open(self._HIRING_PATH, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError):
+            return []
+
+    def saveHiringApplication(self, application):
+        """Append or update a hiring application."""
+        data = self.getHiringApplications()
+        # assign Id if missing
+        if "Id" not in application:
+            used_ids = [a.get("Id") for a in data if "Id" in a]
+            new_id = 0
+            while new_id in used_ids:
+                new_id += 1
+            application["Id"] = new_id
+            data.append(application)
+        else:
+            for i, a in enumerate(data):
+                if a.get("Id") == application["Id"]:
+                    data[i] = application
+                    break
+        os.makedirs("db", exist_ok=True)
+        with open(self._HIRING_PATH, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=4)
+
