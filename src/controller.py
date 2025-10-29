@@ -1,4 +1,5 @@
 from tkinter import messagebox
+import json
 
 class SEPController:
     
@@ -132,7 +133,6 @@ class SEPController:
 
         self.model.saveHiringApplication(application)
         messagebox.showinfo("Saved", "Hiring application created.")
-        # stay on page for rapid entry
         try:
             self.view.serviceManagerView()
         except AttributeError:
@@ -161,6 +161,15 @@ class SEPController:
             return
         messagebox.showinfo("Budget", "Current season budget created.")
         self.view.serviceManagerBudgetWindow()
+
+    def serviceManagerViewProcessedHiring(self):
+        try:
+            with open("db/hiring.json", "r", encoding="utf-8") as f:
+                data = json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError):
+            data = []
+        processed = [a for a in data if a.get("Status") != "Hiring Requested"]
+        self.view.serviceManagerProcessedHiringWindow(processed)
 
 
     def hrUpdateStatus(self, entries, new_status: str):

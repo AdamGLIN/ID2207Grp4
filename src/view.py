@@ -297,6 +297,11 @@ class SEPView :
             command=self.controller.serviceManagerOpenBudgetWindow
         ).pack(pady=6)
 
+        tk.Button(self.root, text="Processed Recruitments",
+              width=26,
+              command=self.controller.serviceManagerViewProcessedHiring).pack(pady=5)
+
+
         tk.Button(self.root, text="Back", command=self.logInView).pack(pady=14)
 
     def serviceManagerHiringWindow(self):
@@ -344,6 +349,44 @@ class SEPView :
                 command=lambda: [self.controller.serviceManagerCreateBudget(popup_entries),win.destroy()]
             ).pack(pady=10)
             tk.Button(win, text="Cancel", command=win.destroy).pack()
+
+    def serviceManagerProcessedHiringWindow(self, processed_apps):
+        win = tk.Toplevel(self.root)
+        win.title("Processed Hiring Applications")
+        win.geometry("650x400")
+        win.resizable(False, False)
+
+        if not processed_apps:
+            tk.Label(win, text="No processed applications found.",
+                    font=("TkDefaultFont", 11)).pack(pady=20)
+            tk.Button(win, text="Close", command=win.destroy).pack(pady=10)
+            return
+
+        # Scrollable frame for long lists
+        canvas = tk.Canvas(win)
+        frame = tk.Frame(canvas)
+        scrollbar = tk.Scrollbar(win, orient="vertical", command=canvas.yview)
+        canvas.configure(yscrollcommand=scrollbar.set)
+
+        scrollbar.pack(side="right", fill="y")
+        canvas.pack(side="left", fill="both", expand=True)
+        canvas.create_window((0, 0), window=frame, anchor="nw")
+
+        # Add each processed hiring record
+        for app in processed_apps:
+            name = app.get("Name", "")
+            pos = app.get("Position", "")
+            status = app.get("Status", "")
+            start = app.get("Start Date", "")
+            tk.Label(frame,
+                    text=f"{name} — {pos} — {status} (Start: {start})",
+                    anchor="w", justify="left").pack(anchor="w", padx=10, pady=3)
+
+        frame.update_idletasks()
+        canvas.config(scrollregion=canvas.bbox("all"))
+
+        tk.Button(win, text="Close", command=win.destroy).pack(pady=8)
+
 
 
     def hrHiringView(self):
