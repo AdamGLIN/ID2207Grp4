@@ -62,6 +62,17 @@ class SEPController:
             request["Status"] = "Rejected"
         self.model.saveRequest(request)
         self.view.seniorCustomerServiceOfficerView()
+        
+    def seniorCustomerServiceOfficerContact(self, entries, valid):
+        request = entries["Request"]
+        commentary = entries["Senior Customer Service Officer Commentary"].get()
+        request["Senior Customer Service Officer Commentary"] += "; contact commentary : " + commentary
+        if valid :
+            request["Status"] = "In Progress"
+        else :
+            request["Status"] = "Rejected"
+        self.model.saveRequest(request)
+        self.view.seniorCustomerServiceOfficerView()
 
     def productionManagerController(self, entries):
         request = entries["Request"]

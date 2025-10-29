@@ -172,7 +172,7 @@ def productionManagerTaskDistribution(model, view, controller):
         "Date" : "3",
         "Budget" : "4",
         "Description" : "5",
-        "Status" : "Accepted",
+        "Status" : "In Progress",
         "Photography Task Description": "6",
         "Audio Task Description" : "7",
         "Graphics Task Description" : "8",
