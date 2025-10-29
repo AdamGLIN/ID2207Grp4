@@ -245,38 +245,106 @@ class SEPView :
 
     def showFinanceBudgets(self):
         win = tk.Toplevel(self.root)
-        win.title("SEP Budgets")
-        win.geometry("650x300")
+        win.title("SEP Budget – Current Event Season")
+        win.geometry("420x220")
         win.resizable(False, False)
 
-        periods = self.controller.financeGetPeriods() or []
-        if not periods:
-            tk.Label(win, text="No finance data.", font=("TkDefaultFont", 11)).pack(pady=20)
+        snap = self.controller.financeGetCurrentSeasonBudget()
+
+        if not snap:
+            tk.Label(win, text="No current season budget defined.", font=("TkDefaultFont", 11)).pack(pady=16)
+            tk.Label(win, text="Ask the Service Manager to create one.", fg="gray").pack(pady=4)
+            tk.Button(win, text="Close", command=win.destroy).pack(pady=12)
             return
 
-        wrap = tk.Frame(win)
-        wrap.pack(fill="both", expand=True, padx=10, pady=10)
+        # snap is like {"budget": ..., "spent": ...}
+        try:
+            budget = float(snap.get("budget", 0))
+            spent  = float(snap.get("spent", 0))
+        except (TypeError, ValueError):
+            budget, spent = 0.0, 0.0
+        left = max(0.0, budget - spent)
+        left_pct = round((left / budget * 100.0), 2) if budget > 0 else 0.0
 
-        for m in periods:
-            snap = self.controller.financeGetMonthlySnapshot(m)
-            tk.Label(
-                wrap,
-                text=f"{snap['season']}:  Budget {int(snap['budget'])}  |  Spent {int(snap['spent'])}  |  Left {int(snap['left'])}  ({snap['left_pct']}%)",
-                anchor="w", justify="left"
-            ).pack(anchor="w", pady=2)
+        tk.Label(win, text="Current event season", font=("TkDefaultFont", 11, "bold")).pack(pady=(14, 8))
+        tk.Label(win, text=f"Budget: {int(budget)}").pack(pady=2)
+        tk.Label(win, text=f"Spent:  {int(spent)}").pack(pady=2)
+        tk.Label(win, text=f"Left:   {int(left)}  ({left_pct}%)").pack(pady=2)
 
-        tk.Button(wrap, text="Close", command=win.destroy).pack(pady=8)
+        tk.Button(win, text="Close", command=win.destroy).pack(pady=12)
 
     def serviceManagerView(self):
         self.entries.clear()
         self.clearView()
 
-        self.root.title("Service Manager – Hiring Application")
-        self.root.geometry("500x360")
+        self.root.title("Service Manager")
+        self.root.geometry("420x220")
         self.root.resizable(False, False)
 
-        form = HiringApplicationForm(self.entries, self.controller.serviceManagerHiringController)
-        form.view(self.root)
+        tk.Label(self.root, text="Service Manager", font=("TkDefaultFont", 12, "bold")).pack(pady=(18, 12))
+
+        tk.Button(
+            self.root,
+            text="Hiring Application",
+            width=22,
+            command=self.controller.serviceManagerOpenHiringWindow
+        ).pack(pady=6)
+
+        tk.Button(
+            self.root,
+            text="Budgeting",
+            width=22,
+            command=self.controller.serviceManagerOpenBudgetWindow
+        ).pack(pady=6)
+
+        tk.Button(self.root, text="Back", command=self.logInView).pack(pady=14)
+
+    def serviceManagerHiringWindow(self):
+        popup_entries = {}
+
+        win = tk.Toplevel(self.root)
+        win.title("Hiring Application")
+        win.geometry("520x390")
+        win.resizable(False, False)
+
+        form = HiringApplicationForm(popup_entries, self.controller.serviceManagerHiringController)
+        form.view(win)
+
+        tk.Button(win, text="Close", command=win.destroy).pack(pady=6)
+
+    def serviceManagerBudgetWindow(self):
+        popup_entries = {}
+
+        win = tk.Toplevel(self.root)
+        win.title("Service Manager – Budgeting (Current event season)")
+        win.geometry("420x220")
+        win.resizable(False, False)
+
+        current = self.model.getCurrentSeasonBudget()
+        if current:
+            # View mode
+            budget = float(current.get("budget", 0))
+            spent = float(current.get("spent", 0))
+            left = budget - spent
+            tk.Label(win, text="Current event season budget", font=("TkDefaultFont", 11, "bold")).pack(pady=(14, 8))
+            tk.Label(win, text=f"Budget: {int(budget)}").pack(pady=2)
+            tk.Label(win, text=f"Spent:  {int(spent)}").pack(pady=2)
+            tk.Label(win, text=f"Left:   {int(left)}").pack(pady=2)
+            tk.Button(win, text="Close", command=win.destroy).pack(pady=12)
+        else:
+            # Create mode
+            tk.Label(win, text="No current season budget exists.", font=("TkDefaultFont", 11)).pack(pady=(18, 8))
+            tk.Label(win, text="Enter budget amount:").pack()
+            entry_amt = tk.Entry(win)
+            entry_amt.pack(pady=6)
+            popup_entries["Season Budget Amount"] = entry_amt
+            tk.Button(
+                win,
+                text="Create Budget",
+                command=lambda: [self.controller.serviceManagerCreateBudget(popup_entries),win.destroy()]
+            ).pack(pady=10)
+            tk.Button(win, text="Cancel", command=win.destroy).pack()
+
 
     def hrHiringView(self):
         self.entries.clear()

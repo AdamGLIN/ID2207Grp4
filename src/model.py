@@ -63,49 +63,47 @@ class SEPModel :
 
     _SEP_FINANCE_PATH = "db/sep_finance.json"
 
-    def _ensure_sep_finance_seed(self):
+    def _ensure_finance_file(self):
         if not os.path.exists(self._SEP_FINANCE_PATH):
             os.makedirs("db", exist_ok=True)
-            seed = {
-                "Past event season": {"budget": 200000, "spent": 180000},
-                "Current event season": {"budget": 200000, "spent": 0},
-                "Upcoming event season": {"budget": 200000, "spent": 0}
-            }
             with open(self._SEP_FINANCE_PATH, "w", encoding="utf-8") as f:
-                json.dump(seed, f, indent=2)
+                json.dump({}, f, indent=2)
 
-    def _load_sep_finance(self):
-        self._ensure_sep_finance_seed()
+    def _load_finance(self):
+        self._ensure_finance_file()
         with open(self._SEP_FINANCE_PATH, "r", encoding="utf-8") as f:
             return json.load(f)
 
-    def getSepFinancePeriods(self):
-        """List of available YYYY-MM strings."""
-        data = self._load_sep_finance()
-        return sorted(data.keys())
+    def _save_finance(self, data):
+        os.makedirs("db", exist_ok=True)
+        with open(self._SEP_FINANCE_PATH, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2)
 
-    def getSepFinanceSnapshot(self, month_str: str):
-        """
-        Return: {'Season','budget','spent','left','left_pct'}
-        """
-        data = self._load_sep_finance()
-        row = data.get(month_str)
-        if not row:
-            return {"season": month_str, "budget": 0, "spent": 0, "left": 0, "left_pct": 0.0}
-        budget = float(row.get("budget", 0))
-        spent = float(row.get("spent", 0))
-        left = budget - spent
-        left_pct = (left / budget * 100.0) if budget > 0 else 0.0
-        return {
-            "season": month_str,
-            "budget": budget,
-            "spent": spent,
-            "left": left,
-            "left_pct": round(left_pct, 2)
-        }
+    def hasCurrentSeasonBudget(self):
+        data = self._load_finance()
+        return "Current event season" in data
+
+    def getCurrentSeasonBudget(self):
+        data = self._load_finance()
+        return data.get("Current event season")
+
+    def createCurrentSeasonBudget(self, amount):
+        self._ensure_finance_file()
+        try:
+            amt = float(amount)
+        except (TypeError, ValueError):
+            raise ValueError("Budget amount must be numeric.")
+        if amt < 0:
+            raise ValueError("Budget amount must be non-negative.")
+
+        data = self._load_finance()
+        data["Current event season"] = {"budget": amt, "spent": 0.0}
+        self._save_finance(data)
+
     
     def updateSepFinanceOnAcceptance(self, amount, season="Current event season"):
-        self._ensure_sep_finance_seed()
+        if not self.hasCurrentSeasonBudget():
+            return  # No budget to update
         try:
             amt = float(amount) if amount is not None else 0.0
         except (TypeError, ValueError):

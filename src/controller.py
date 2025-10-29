@@ -39,11 +39,8 @@ class SEPController:
             messagebox.showerror("Error", "Wrong credentials")
             return False
         
-    def financeGetPeriods(self):
-        return self.model.getSepFinancePeriods()
-
-    def financeGetMonthlySnapshot(self, month_str: str):
-        return self.model.getSepFinanceSnapshot(month_str)
+    def financeGetCurrentSeasonBudget(self):
+        return self.model.getCurrentSeasonBudget()
         
     def clientCallController(self, entries):
         request = dict()
@@ -140,6 +137,31 @@ class SEPController:
             self.view.serviceManagerView()
         except AttributeError:
             pass
+
+    def serviceManagerOpenHiringWindow(self):
+        try:
+            self.view.serviceManagerHiringWindow()
+        except AttributeError:
+            messagebox.showerror("Error", "Hiring popup not available in the view.")
+
+    def serviceManagerOpenBudgetWindow(self):
+        try:
+            self.view.serviceManagerBudgetWindow()
+        except AttributeError:
+            messagebox.showerror("Error", "Budget window not available in the view.")
+
+    def serviceManagerCreateBudget(self, entries):
+        """Create current season budget from window field."""
+        amount_widget = entries.get("Season Budget Amount")
+        amount = amount_widget.get().strip() if amount_widget else ""
+        try:
+            self.model.createCurrentSeasonBudget(amount)
+        except Exception as e:
+            messagebox.showerror("Budget error", str(e))
+            return
+        messagebox.showinfo("Budget", "Current season budget created.")
+        self.view.serviceManagerBudgetWindow()
+
 
     def hrUpdateStatus(self, entries, new_status: str):
         """HR sets status for the selected hiring application, then refreshes the HR page."""
