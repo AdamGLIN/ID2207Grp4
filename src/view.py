@@ -248,19 +248,19 @@ class SEPView :
         win.geometry("650x300")
         win.resizable(False, False)
 
-        months = self.controller.financeGetMonths() or []
-        if not months:
+        periods = self.controller.financeGetPeriods() or []
+        if not periods:
             tk.Label(win, text="No finance data.", font=("TkDefaultFont", 11)).pack(pady=20)
             return
 
         wrap = tk.Frame(win)
         wrap.pack(fill="both", expand=True, padx=10, pady=10)
 
-        for m in months:
+        for m in periods:
             snap = self.controller.financeGetMonthlySnapshot(m)
             tk.Label(
                 wrap,
-                text=f"{snap['month']}:  Budget {int(snap['budget'])}  |  Spent {int(snap['spent'])}  |  Left {int(snap['left'])}  ({snap['left_pct']}%)",
+                text=f"{snap['season']}:  Budget {int(snap['budget'])}  |  Spent {int(snap['spent'])}  |  Left {int(snap['left'])}  ({snap['left_pct']}%)",
                 anchor="w", justify="left"
             ).pack(anchor="w", pady=2)
 

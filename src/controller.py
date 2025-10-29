@@ -39,11 +39,11 @@ class SEPController:
             messagebox.showerror("Error", "Wrong credentials")
             return False
         
-    def financeGetMonths(self):
-        return self.model.getSepFinanceMonths()
+    def financeGetPeriods(self):
+        return self.model.getSepFinancePeriods()
 
     def financeGetMonthlySnapshot(self, month_str: str):
-        return self.model.getSepMonthlySnapshot(month_str)
+        return self.model.getSepFinanceSnapshot(month_str)
         
     def clientCallController(self, entries):
         request = dict()

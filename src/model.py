@@ -78,25 +78,25 @@ class SEPModel :
         with open(self._SEP_FINANCE_PATH, "r", encoding="utf-8") as f:
             return json.load(f)
 
-    def getSepFinanceMonths(self):
+    def getSepFinancePeriods(self):
         """List of available YYYY-MM strings."""
         data = self._load_sep_finance()
         return sorted(data.keys())
 
-    def getSepMonthlySnapshot(self, month_str: str):
+    def getSepFinanceSnapshot(self, month_str: str):
         """
-        Return: {'month','budget','spent','left','left_pct'}
+        Return: {'Season','budget','spent','left','left_pct'}
         """
         data = self._load_sep_finance()
         row = data.get(month_str)
         if not row:
-            return {"month": month_str, "budget": 0, "spent": 0, "left": 0, "left_pct": 0.0}
+            return {"season": month_str, "budget": 0, "spent": 0, "left": 0, "left_pct": 0.0}
         budget = float(row.get("budget", 0))
         spent = float(row.get("spent", 0))
         left = budget - spent
         left_pct = (left / budget * 100.0) if budget > 0 else 0.0
         return {
-            "month": month_str,
+            "season": month_str,
             "budget": budget,
             "spent": spent,
             "left": left,
