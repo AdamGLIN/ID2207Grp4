@@ -1,4 +1,5 @@
 import inspect, sys, json, os
+import tkinter as tk
 
 def correctCredentials(_model, view, controller):
     view.logInView()
@@ -289,17 +290,26 @@ def financialReviewRejectUpdatesRequest(model, view, controller):
     return req_ok and finance_ok
 
 def serviceManagerHiringEmpty(_model, view, controller):
+    # Clean DB
     if os.path.exists("db/hiring.json"):
         os.remove("db/hiring.json")
 
-    view.serviceManagerView()
-    view.entries["Name"].insert(0, "Alice Andersson")
-    view.entries["Contact"].insert(0, "alice@example.com")
-    view.entries["Salary"].insert(0, "45000")
-    view.entries["Position"].insert(0, "Event Coordinator")
-    view.entries["Start Date"].insert(0, "2025-11-15")
+    # Build our own entries dict (don’t rely on view.entries)
+    entries = {
+        "Name": tk.Entry(view.root),
+        "Contact": tk.Entry(view.root),
+        "Salary": tk.Entry(view.root),
+        "Position": tk.Entry(view.root),
+        "Start Date": tk.Entry(view.root),
+    }
+    entries["Name"].insert(0, "Alice Andersson")
+    entries["Contact"].insert(0, "alice@example.com")
+    entries["Salary"].insert(0, "45000")
+    entries["Position"].insert(0, "Event Coordinator")
+    entries["Start Date"].insert(0, "2025-11-15")
 
-    controller.serviceManagerHiringController(view.entries)
+    # Call controller directly
+    controller.serviceManagerHiringController(entries)
 
     expected = {
         "Name": "Alice Andersson",
@@ -308,17 +318,18 @@ def serviceManagerHiringEmpty(_model, view, controller):
         "Position": "Event Coordinator",
         "Start Date": "2025-11-15",
         "Status": "Hiring Requested",
-        "Id": 0
+        "Id": 0,
     }
     try:
         with open("db/hiring.json", "r", encoding="utf-8") as f:
             data = json.load(f)
     except (FileNotFoundError, json.JSONDecodeError):
         data = []
-    
     return expected in data
 
+
 def serviceManagerHiringNotEmpty(_model, view, controller):
+    # Seed one existing application (Id=0)
     seed = [{
         "Name": "Bob Berg",
         "Contact": "bob@example.com",
@@ -328,20 +339,25 @@ def serviceManagerHiringNotEmpty(_model, view, controller):
         "Status": "Hiring Requested",
         "Id": 0
     }]
-
     os.makedirs("db", exist_ok=True)
     with open("db/hiring.json", "w", encoding="utf-8") as f:
         json.dump(seed, f, indent=4)
 
-    # Create a new one
-    view.serviceManagerView()
-    view.entries["Name"].insert(0, "Carla Carls")
-    view.entries["Contact"].insert(0, "carla@example.com")
-    view.entries["Salary"].insert(0, "48000")
-    view.entries["Position"].insert(0, "Producer")
-    view.entries["Start Date"].insert(0, "2025-12-01")
+    # Build entries dict for the new app
+    entries = {
+        "Name": tk.Entry(view.root),
+        "Contact": tk.Entry(view.root),
+        "Salary": tk.Entry(view.root),
+        "Position": tk.Entry(view.root),
+        "Start Date": tk.Entry(view.root),
+    }
+    entries["Name"].insert(0, "Carla Carls")
+    entries["Contact"].insert(0, "carla@example.com")
+    entries["Salary"].insert(0, "48000")
+    entries["Position"].insert(0, "Producer")
+    entries["Start Date"].insert(0, "2025-12-01")
 
-    controller.serviceManagerHiringController(view.entries)
+    controller.serviceManagerHiringController(entries)
 
     expected = {
         "Name": "Carla Carls",
@@ -350,15 +366,15 @@ def serviceManagerHiringNotEmpty(_model, view, controller):
         "Position": "Producer",
         "Start Date": "2025-12-01",
         "Status": "Hiring Requested",
-        "Id": 1
+        "Id": 1,
     }
     try:
         with open("db/hiring.json", "r", encoding="utf-8") as f:
             data = json.load(f)
     except (FileNotFoundError, json.JSONDecodeError):
         data = []
-    
     return expected in data
+
 
 def hrDeclinesHiringRemovesFromPending(model, view, controller):
     if os.path.exists("db/hiring.json"):
