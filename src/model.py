@@ -16,6 +16,7 @@ Status = [
     "Financial Review",
     "Administration Review",
     "Accepted",
+    "In Progress",
     "Rejected"
 ]
 

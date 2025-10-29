@@ -162,7 +162,8 @@ class SEPView :
         
         requests = self.model.getRequests()
         callbacks = {
-            "Initial": self.controller.seniorCustomerServiceOfficerReview
+            "Initial": self.controller.seniorCustomerServiceOfficerReview,
+            "Accepted": self.controller.seniorCustomerServiceOfficerContact
         }
         
         controlPanel = SeniorCustomerServiceOfficerReviewPage(self.entries, callbacks)
@@ -179,7 +180,7 @@ class SEPView :
         self.root.resizable(False, False)
         
         for request in requests:
-            if request["Status"] == "Accepted" and "Production Tasks Distributed" not in request:
+            if request["Status"] == "In Progress" and "Production Tasks Distributed" not in request:
                 label = tk.Label(self.root, text=json.dumps(request, indent=4), justify="left")
                 label.pack(pady=(60, 5))
                 self.entries["Request"] = request
