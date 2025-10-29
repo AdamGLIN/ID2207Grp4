@@ -198,6 +198,233 @@ def productionManagerTaskDistribution(model, view, controller):
             return request in json.load(f)
     except (FileNotFoundError):
         return False
+    
+def financialReviewAcceptUpdatesFinance(model, view, controller):
+    if os.path.exists("db/request.json"):
+        os.remove("db/request.json")
+        
+    os.makedirs("db", exist_ok=True)
+    seed = {
+        "Past event season": {"budget": 200000, "spent": 180000},
+        "Current event season": {"budget": 200000, "spent": 0},
+        "Upcoming event season": {"budget": 200000, "spent": 0}
+    }
+    with open("db/sep_finance.json", "w", encoding="utf-8") as f:
+        json.dump(seed, f, indent=2)
+
+    request = {
+        "Client Name": "CLIENT_A",
+        "Contact": "john@client.com",
+        "Type": "Conference",
+        "Date": "2025-11-01",
+        "Budget": "1000",
+        "Description": "Test event",
+        "Status": "Financial Review"
+    }
+    model.saveRequest(request)
+
+    view.financialManagerView()
+
+    # add commentary and accept
+    view.entries["Financial Manager Commentary"].insert(0, "Looks good within budget.")
+    controller.financialManagerController(view.entries, True)
+
+    # verify finance spent increased by 1000
+    try:
+        with open("db/sep_finance.json", "r", encoding="utf-8") as f:
+            spent = json.load(f)["Current event season"]["spent"]
+    except Exception:
+        return None
+    finance_ok = (spent == 1000)
+
+    return finance_ok
+
+def financialReviewRejectUpdatesRequest(model, view, controller):
+    if os.path.exists("db/request.json"):
+        os.remove("db/request.json")
+
+    os.makedirs("db", exist_ok=True)
+    seed = {
+        "Past event season": {"budget": 200000, "spent": 180000},
+        "Current event season": {"budget": 200000, "spent": 0},
+        "Upcoming event season": {"budget": 200000, "spent": 0}
+    }
+    with open("db/sep_finance.json", "w", encoding="utf-8") as f:
+        json.dump(seed, f, indent=2)
+
+    request = {
+        "Client Name": "CLIENT_B",
+        "Contact": "bob@client.com",
+        "Type": "Expo",
+        "Date": "2025-12-12",
+        "Budget": "2500",
+        "Description": "Reject path test",
+        "Status": "Financial Review"
+    }
+    model.saveRequest(request)
+
+    view.financialManagerView()
+    view.entries["Financial Manager Commentary"].insert(0, "Insufficient allocation this season.")
+    controller.financialManagerController(view.entries, False)
+
+    try:
+        with open("db/request.json", "r", encoding="utf-8") as f:
+            data = json.load(f)
+    except FileNotFoundError:
+        data = False
+
+    request["Status"] = "Rejected"
+    request["Financial Manager Commentary"] = "Insufficient allocation this season."
+    req_ok = request in data
+
+    # spent should remain 0 for current season
+    try:
+        with open("db/sep_finance.json", "r", encoding="utf-8") as f:
+            spent = json.load(f)["Current event season"]["spent"]
+    except Exception:
+        spent = False
+    
+    finance_ok = (spent == 0)
+
+    return req_ok and finance_ok
+
+def serviceManagerHiringEmpty(_model, view, controller):
+    if os.path.exists("db/hiring.json"):
+        os.remove("db/hiring.json")
+
+    view.serviceManagerView()
+    view.entries["Name"].insert(0, "Alice Andersson")
+    view.entries["Contact"].insert(0, "alice@example.com")
+    view.entries["Salary"].insert(0, "45000")
+    view.entries["Position"].insert(0, "Event Coordinator")
+    view.entries["Start Date"].insert(0, "2025-11-15")
+
+    controller.serviceManagerHiringController(view.entries)
+
+    expected = {
+        "Name": "Alice Andersson",
+        "Contact": "alice@example.com",
+        "Salary": "45000",
+        "Position": "Event Coordinator",
+        "Start Date": "2025-11-15",
+        "Status": "Hiring Requested",
+        "Id": 0
+    }
+    try:
+        with open("db/hiring.json", "r", encoding="utf-8") as f:
+            data = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        data = []
+    
+    return expected in data
+
+def serviceManagerHiringNotEmpty(_model, view, controller):
+    seed = [{
+        "Name": "Bob Berg",
+        "Contact": "bob@example.com",
+        "Salary": "40000",
+        "Position": "Tech",
+        "Start Date": "2025-10-01",
+        "Status": "Hiring Requested",
+        "Id": 0
+    }]
+
+    os.makedirs("db", exist_ok=True)
+    with open("db/hiring.json", "w", encoding="utf-8") as f:
+        json.dump(seed, f, indent=4)
+
+    # Create a new one
+    view.serviceManagerView()
+    view.entries["Name"].insert(0, "Carla Carls")
+    view.entries["Contact"].insert(0, "carla@example.com")
+    view.entries["Salary"].insert(0, "48000")
+    view.entries["Position"].insert(0, "Producer")
+    view.entries["Start Date"].insert(0, "2025-12-01")
+
+    controller.serviceManagerHiringController(view.entries)
+
+    expected = {
+        "Name": "Carla Carls",
+        "Contact": "carla@example.com",
+        "Salary": "48000",
+        "Position": "Producer",
+        "Start Date": "2025-12-01",
+        "Status": "Hiring Requested",
+        "Id": 1
+    }
+    try:
+        with open("db/hiring.json", "r", encoding="utf-8") as f:
+            data = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        data = []
+    
+    return expected in data
+
+def hrDeclinesHiringRemovesFromPending(model, view, controller):
+    if os.path.exists("db/hiring.json"):
+        os.remove("db/hiring.json")
+    app = {
+        "Name": "Dina Dahl",
+        "Contact": "dina@example.com",
+        "Salary": "42000",
+        "Position": "Assistant",
+        "Start Date": "2026-01-10",
+        "Status": "Hiring Requested",
+    }
+    model.saveHiringApplication(app)
+
+    view.hrHiringView()
+    controller.hrUpdateStatus(view.entries, "Declined")
+
+    try:
+        with open("db/hiring.json", "r", encoding="utf-8") as f:
+            data = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        data = []
+
+    exists_declined = any(
+        d.get("Name") == "Dina Dahl" and
+        d.get("Contact") == "dina@example.com" and
+        d.get("Position") == "Assistant" and
+        d.get("Status") == "Declined"
+        for d in data
+    )
+    still_pending = any(
+        d.get("Name") == "Dina Dahl" and d.get("Status") == "Hiring Requested"
+        for d in data
+    )
+    return exists_declined and not still_pending
+
+def hrStartsProcessRemovesFromPending(model, view, controller):
+    if os.path.exists("db/hiring.json"):
+        os.remove("db/hiring.json")
+    app = {
+        "Name": "Erik Ek",
+        "Contact": "erik@example.com",
+        "Salary": "47000",
+        "Position": "Stage Manager",
+        "Start Date": "2025-11-20",
+        "Status": "Hiring Requested",
+    }
+    model.saveHiringApplication(app)
+
+    view.hrHiringView()
+    controller.hrUpdateStatus(view.entries, "Hiring Process Started")
+
+    try:
+        with open("db/hiring.json", "r", encoding="utf-8") as f:
+            data = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        data = []
+    exists_started = any(
+        d.get("Name") == "Erik Ek" and d.get("Status") == "Hiring Process Started"
+        for d in data
+    )
+    still_pending = any(
+        d.get("Name") == "Erik Ek" and d.get("Status") == "Hiring Requested"
+        for d in data
+    )
+    return exists_started and not still_pending
 
 testSet = [
     obj for _, obj in inspect.getmembers(sys.modules[__name__], inspect.isfunction)
