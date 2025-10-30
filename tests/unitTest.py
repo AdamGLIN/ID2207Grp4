@@ -1,5 +1,6 @@
 import inspect, sys, json, os
 import tkinter as tk
+import tkinter.messagebox as messagebox
 
 def correctCredentials(_model, view, controller):
     view.logInView()
@@ -290,11 +291,9 @@ def financialReviewRejectUpdatesRequest(model, view, controller):
     return req_ok and finance_ok
 
 def serviceManagerHiringEmpty(_model, view, controller):
-    # Clean DB
     if os.path.exists("db/hiring.json"):
         os.remove("db/hiring.json")
 
-    # Build our own entries dict (don’t rely on view.entries)
     entries = {
         "Name": tk.Entry(view.root),
         "Contact": tk.Entry(view.root),
@@ -331,7 +330,7 @@ def serviceManagerHiringEmpty(_model, view, controller):
 def serviceManagerHiringNotEmpty(_model, view, controller):
     # Seed one existing application (Id=0)
     seed = [{
-        "Name": "Bob Berg",
+        "Name": "Bobby Bobson",
         "Contact": "bob@example.com",
         "Salary": "40000",
         "Position": "Tech",
@@ -351,8 +350,8 @@ def serviceManagerHiringNotEmpty(_model, view, controller):
         "Position": tk.Entry(view.root),
         "Start Date": tk.Entry(view.root),
     }
-    entries["Name"].insert(0, "Carla Carls")
-    entries["Contact"].insert(0, "carla@example.com")
+    entries["Name"].insert(0, "Carla")
+    entries["Contact"].insert(0, "carla@mail.com")
     entries["Salary"].insert(0, "48000")
     entries["Position"].insert(0, "Producer")
     entries["Start Date"].insert(0, "2025-12-01")
@@ -360,8 +359,8 @@ def serviceManagerHiringNotEmpty(_model, view, controller):
     controller.serviceManagerHiringController(entries)
 
     expected = {
-        "Name": "Carla Carls",
-        "Contact": "carla@example.com",
+        "Name": "Carla",
+        "Contact": "carla@mail.com",
         "Salary": "48000",
         "Position": "Producer",
         "Start Date": "2025-12-01",
@@ -375,13 +374,26 @@ def serviceManagerHiringNotEmpty(_model, view, controller):
         data = []
     return expected in data
 
+def ServiceManagerBudgetAccess(model, view, controller):
+    os.makedirs("db", exist_ok=True)
+    seed = {
+        "Current event season": {"budget": 150000, "spent": 30000}
+    }
+    with open("db/sep_finance.json", "w", encoding="utf-8") as f:
+        json.dump(seed, f, indent=2)
+
+    budget = controller.financeGetCurrentSeasonBudget()
+
+    return isinstance(budget, dict) and budget.get("budget") == 150000 and budget.get("spent") == 30000
+
+
 
 def hrDeclinesHiringRemovesFromPending(model, view, controller):
     if os.path.exists("db/hiring.json"):
         os.remove("db/hiring.json")
     app = {
-        "Name": "Dina Dahl",
-        "Contact": "dina@example.com",
+        "Name": "dustin",
+        "Contact": "d@example.com",
         "Salary": "42000",
         "Position": "Assistant",
         "Start Date": "2026-01-10",
@@ -399,8 +411,8 @@ def hrDeclinesHiringRemovesFromPending(model, view, controller):
         data = []
 
     exists_declined = any(
-        d.get("Name") == "Dina Dahl" and
-        d.get("Contact") == "dina@example.com" and
+        d.get("Name") == "dustin" and
+        d.get("Contact") == "d@example.com" and
         d.get("Position") == "Assistant" and
         d.get("Status") == "Declined"
         for d in data
