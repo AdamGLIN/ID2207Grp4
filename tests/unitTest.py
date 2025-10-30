@@ -118,12 +118,14 @@ def validInitialClientRequestAnalysis(model, view, controller):
     }
     
     model.saveRequest(request)
-        
-    view.seniorCustomerServiceOfficerView()
+    saved_req = model.getRequests()[-1]
+
+    entries = {
+        "Request": saved_req,
+        "Senior Customer Service Officer Commentary": type("Mock", (), {"get": lambda self="": "6"})()
+    }
     
-    view.entries["Senior Customer Service Officer Commentary"].insert(0, "6")
-    
-    controller.seniorCustomerServiceOfficerReview(view.entries, True)
+    controller.seniorCustomerServiceOfficerReview(entries, True)
     
     try :
         with open("db/request.json", "r") as f:
@@ -148,12 +150,14 @@ def invalidInitialClientRequestAnalysis(model, view, controller):
     }
     
     model.saveRequest(request)
-        
-    view.seniorCustomerServiceOfficerView()
+    saved_req = model.getRequests()[-1]
+
+    entries = {
+        "Request": saved_req,
+        "Senior Customer Service Officer Commentary": type("Mock", (), {"get": lambda self="": "6"})()
+    }
     
-    view.entries["Senior Customer Service Officer Commentary"].insert(0, "6")
-    
-    controller.seniorCustomerServiceOfficerReview(view.entries, False)
+    controller.seniorCustomerServiceOfficerReview(entries, False)
     
     try :
         with open("db/request.json", "r") as f:
@@ -224,12 +228,14 @@ def financialReviewAcceptUpdatesFinance(model, view, controller):
         "Status": "Financial Review"
     }
     model.saveRequest(request)
+    saved_req = model.getRequests()[-1]
 
-    view.financialManagerView()
-
-    # add commentary and accept
-    view.entries["Financial Manager Commentary"].insert(0, "Looks good within budget.")
-    controller.financialManagerController(view.entries, True)
+    # Minimal entries dict with lambda .get()
+    entries = {
+        "Request": saved_req,
+        "Financial Manager Commentary": type("Mock", (), {"get": lambda self="": "Looks good within budget."})()
+    }
+    controller.financialManagerController(entries, True)
 
     # verify finance spent increased by 1000
     try:
@@ -264,10 +270,14 @@ def financialReviewRejectUpdatesRequest(model, view, controller):
         "Status": "Financial Review"
     }
     model.saveRequest(request)
+    saved_req = model.getRequests()[-1]
 
-    view.financialManagerView()
-    view.entries["Financial Manager Commentary"].insert(0, "Insufficient allocation this season.")
-    controller.financialManagerController(view.entries, False)
+    # Minimal entries dict with lambda .get()
+    entries = {
+        "Request": saved_req,
+        "Financial Manager Commentary": type("Mock", (), {"get": lambda self="": "Insufficient allocation this season."})()
+    }
+    controller.financialManagerController(entries, False)
 
     try:
         with open("db/request.json", "r", encoding="utf-8") as f:
